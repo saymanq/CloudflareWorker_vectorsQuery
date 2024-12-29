@@ -40,9 +40,12 @@ app.post('/:userId/:semester/:courseId', async (c) => {
     throw new Error('Invalid action type')
   }
 
-  const vecIds = simmatches.matches.filter(vec => vec.score > SIMILARITY_THRESHOLD).map(vec => vec.id)
+  const vecResults = simmatches.matches.filter(vec => vec.score > SIMILARITY_THRESHOLD).map(vec => ({
+    id: vec.id,
+    title: vec.metadata?.title,
+  }))
 
-  return c.json({ vecIds })
+  return c.json({ matches: vecResults })
 })
 
 export default app
