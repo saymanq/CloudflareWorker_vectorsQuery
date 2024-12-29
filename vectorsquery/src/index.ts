@@ -11,7 +11,7 @@ app.get('/health', (c) => {
   return c.json({ code: 200, status: 'healthy' })
 })
 
-app.post('/:userId/:semester/:courseId', async (c) => {
+app.post('/vector/:userId/:semester/:courseId', async (c) => {
   const userId = c.req.param('userId')
   const semester = c.req.param('semester')
   const courseId = c.req.param('courseId')
@@ -46,6 +46,23 @@ app.post('/:userId/:semester/:courseId', async (c) => {
   }))
 
   return c.json({ matches: vecResults })
+})
+
+app.post('/llama/summarizetopic', async (c) => {
+  const { topic, context } = await c.req.json()
+  console.log(topic, context);
+  const messages = [
+    { role: "system", content: "You are a perfect summarizer, you are given a topic and you need to find relevant information only from the context provided and create a summary in very simple terms and words only related to the topic from the context. Respond as if you are directly giving the answer and do not include any introductory or ending sentences (for example, sure, I can provide an answer). Be straight to the point." },
+    {
+      role: "user",
+      content: `(Topic: ${topic})\n(Context: ${context})`,
+    },
+  ];
+
+  const response = await c.env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", { messages });
+
+  return Response.json(response);
+
 })
 
 export default app
