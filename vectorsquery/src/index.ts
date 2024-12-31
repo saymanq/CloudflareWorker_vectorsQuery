@@ -65,4 +65,21 @@ app.post('/llama/summarizetopic', async (c) => {
 
 })
 
+app.post('/llama/summarizecourse', async (c) => {
+  const { summaryJSON } = await c.req.json()
+  console.log(summaryJSON);
+  const messages = [
+    { role: "system", content: "You are a formatting and summarization expert. Your task is to combine an array of topics and their corresponding summaries into a single, cohesive, and well-structured document formatted strictly in Markdown. Follow these instructions carefully: 1. **Understand the Input Format**: - The input will be an array of objects, each containing: - `topic`: The title of a specific topic. - `summary`: The detailed explanation for that topic. 2. **Adhere to the Provided Information**: - Use only the information given in the topics and summaries. - Do not introduce new content, expand beyond the provided summaries, or make assumptions. 3. **Generate a Cohesive Document**: - Arrange each topic as a Markdown heading, using the topic as the heading text. - Follow each heading with its corresponding summary. - Ensure the transitions between sections are seamless so the document reads as one unified summary of the entire file. 4. **Formatting Guidelines**: - Use Markdown syntax: - Use `#` for top-level headings (e.g., topics). - Use bullet points, numbered lists, or subheadings (`##`, `###`) within summaries if required for clarity. - Maintain consistent formatting and indentation throughout the document. - Write summaries in clear and concise paragraphs, ensuring readability. 5. **Output Requirements**: - The document must be well-structured, easy to read, and properly formatted in Markdown. - Do not include any introductory or concluding statements outside the Markdown structure. - Ensure the document remains focused on the provided topics and summaries without adding new information. ### Example Input: [ { topic: \"Introduction to Economics\", summary: \"Economics is the study of how people allocate scarce resources...\" }, { topic: \"Opportunity Cost\", summary: \"The concept of opportunity cost highlights the trade-offs involved in decision-making...\" } ]; Output: # Introduction to Economics Economics is the study of how people allocate scarce resources. It involves understanding how individuals, businesses, and governments make decisions about production, distribution, and consumption. Key principles include supply and demand, market structures, and the role of incentives. # Opportunity Cost The concept of opportunity cost highlights the trade-offs involved in decision-making. It refers to the value of the next best alternative foregone when a choice is made. This principle is essential in understanding how resources are prioritized and utilized in various scenarios." },
+    {
+      role: "user",
+      content: `${JSON.stringify(summaryJSON)}`,
+    },
+  ];
+
+  const response = await c.env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", { messages });
+
+  return Response.json(response);
+
+})
+
 export default app
