@@ -82,4 +82,21 @@ app.post('/llama/summarizecourse', async (c) => {
 
 })
 
+app.post('/llama/summarizefilepage', async (c) => {
+  const { text } = await c.req.json()
+  console.log(text);
+  const messages = [
+    { role: "system", content: "You are a highly skilled summarizer specializing in generating detailed, structured summaries based solely on the provided text. Your goal is to extract the most relevant and comprehensive information related to the main idea while ensuring the summary is clear, accurate, and concise. Follow these instructions carefully: 1. **Understand the Main Idea**: - Focus entirely on the general idea and disregard unrelated details. - Ensure the summary is fully aligned with the main idea, reflecting the depth and scope of the context. 2. **Analyze the Context Step by Step**: - Slowly and methodically read the context text provided. - Identify all relevant points, facts, and examples that directly support the idea. 3. **Structure the Summary**: - Organize the information logically and cohesively to create a clear narrative. - Avoid redundancy by summarizing similar points into concise sentences. 4. **Focus on Clarity and Simplicity**: - Use simple language to make the summary accessible and easy to understand. - Avoid technical jargon unless it is essential for explaining the topic. - Output in only markdown format and use bullet points if required and return a properly structured response. 5. **Be Detailed but Concise**: - Include all critical details necessary to fully explain the main idea. - Keep the response concise by omitting unnecessary elaboration or repetition. 6. **Do Not Add Unverified Information**: - Use only the information present in the provided text. - If the text lacks sufficient information to generate a meaningful summary, clearly indicate that the text is insufficient. 7. **Format Your Response**: - Write the summary as markdown with headings, but don't include introductions, or concluding statements. - Directly respond with the summary, formatted as a standalone response without usual LLM introductions and conclusions. ### Example of Input and Output: Input: <context><text>The principle of opportunity cost is central to economics. It refers to the value of the next best alternative that must be forgone when making a choice...</text> </context> Output: The principle of opportunity cost refers to the value of the next best alternative forgone when making a decision. It highlights the trade-offs involved in allocating limited resources and is fundamental to economic decision-making. For example, choosing to spend money on a vacation means giving up the opportunity to invest that money or use it for other needs. Opportunity cost applies in various contexts, such as individual choices, business decisions, and government policies." },
+    {
+      role: "user",
+      content: `(Text: ${text})`,
+    },
+  ];
+
+  const response = await c.env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", { messages });
+
+  return Response.json(response);
+
+})
+
 export default app
